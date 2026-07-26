@@ -1,0 +1,519 @@
+
+
+<div class="container">
+    <div class="header">
+        <div class="brand-logo-container">
+            <div class="logo-box">
+                <svg width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 12 38 Q 24 33, 36 38 T 60 38 T 84 38 T 88 38" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                    <path d="M 12 54 Q 24 49, 36 54 T 60 54 T 84 54 T 88 54" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                    <path d="M 12 70 Q 24 65, 36 70 T 60 70 T 84 70 T 88 70" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                    <polygon points="43,12 57,12 42,48 68,38 51,90 57,52 32,58" fill="#ED1C24"/>
+                </svg>
+            </div>
+            <div class="logo-text-group">
+                <span class="pln-title">PLN</span>
+                <span class="icon-plus-title">Icon Plus</span>
+            </div>
+        </div>
+
+        <h2>INTEGRASI FORM QUALITY CONTROL & AUDIT</h2>
+        <p>Inspeksi Kesesuaian Spesifikasi & Kualitas Pengerjaan Mitra</p>
+        
+        <a href="https://drive.google.com/drive/folders/1dWm772MqbzhVOxX6AGtfQIx1VudDJWxk?usp=sharing" target="_blank" class="btn-drive-header no-print" title="Buka Folder Drive Utama QC">
+            <i class="fab fa-google-drive"></i>
+        </a>
+    </div>
+
+    <!-- Stepper Navigation -->
+    <div class="stepper no-print">
+        <div class="step active" id="step0-ind" onclick="goToStep(0)">0. Riwayat & Draft</div>
+        <div class="step" id="step1-ind" onclick="goToStep(1)">1. Request Admin/Mitra (Vol Awal)</div>
+        <div class="step" id="step2-ind" onclick="goToStep(2)">2. Audit FS (Vol Akhir & Penilaian)</div>
+        <div class="step" id="step3-ind" onclick="goToStep(3)">3. Preview 7 Halaman Surat</div>
+    </div>
+
+    <form id="mainForm" onsubmit="event.preventDefault();">
+        
+        <!-- STEP 0: RIWAYAT / DRAFT FORM -->
+        <div id="step0-container" class="form-content">
+            <div class="section-title"><i class="fas fa-history"></i> Daftar Riwayat Pengisian QC</div>
+            
+            <div class="search-box-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchDraftInput" class="search-input" placeholder="Cari berdasarkan Nomor PA, Pelanggan, atau Vendor..." oninput="filterHistory()">
+            </div>
+
+            <div id="historyList"></div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="createNewForm()"><i class="fas fa-plus"></i> Buat Pengisian Form Baru (Admin/Mitra)</button>
+                <a href="https://drive.google.com/drive/folders/1dWm772MqbzhVOxX6AGtfQIx1VudDJWxk?usp=sharing" target="_blank" class="btn btn-outline">
+                    <i class="fab fa-google-drive"></i> Buka Folder Utama Google Drive
+                </a>
+            </div>
+        </div>
+
+        <!-- STEP 1: FORM PENGISIAN REQUEST ADMIN/MITRA -->
+        <div id="step1-container" class="form-content" style="display: none;">
+            <div class="section-title"><i class="fas fa-file-alt"></i> Data Administrasi Pekerjaan</div>
+            <div class="form-grid">
+                <div class="form-group"><label>Tanggal Quality Control</label><input type="date" class="form-control" id="tglQC"></div>
+                <div class="form-group"><label>Nomor PA</label><input type="text" class="form-control" id="nomorPA" placeholder="Masukkan Nomor PA"></div>
+                <div class="form-group"><label>Nama Pekerjaan</label><input type="text" class="form-control" id="namaPekerjaan" placeholder="Masukkan Nama Pekerjaan"></div>
+                <div class="form-group"><label>Nama Rekanan/Vendor</label><input type="text" class="form-control" id="namaMitra" placeholder="PT. Rekanan Mitra"></div>
+                
+                <div class="form-group"><label>Penanggung Jawab Mitra (Lapangan)</label><input type="text" class="form-control" id="pjMitra" placeholder="Nama Penanggung Jawab Mitra"></div>
+                <div class="form-group"><label>Field Supervisor (FS) Bertugas</label><input type="text" class="form-control" id="namaFS" placeholder="Nama FS Bertugas"></div>
+
+                <div class="form-group"><label>Nama POP</label><input type="text" class="form-control" id="namaPOP" placeholder="Nama POP / Shelter"></div>
+                <div class="form-group"><label>Nama Pelanggan</label><input type="text" class="form-control" id="namaPelanggan" placeholder="Nama Pelanggan"></div>
+                <div class="form-group" style="grid-column: span 1 / -1;"><label>Alamat Pelanggan</label><input type="text" class="form-control" id="alamatPelanggan" placeholder="Alamat Lengkap Pelanggan"></div>
+                
+                <div class="form-group"><label>Project Team Leader (PTL)</label><input type="text" class="form-control" id="namaPTL" placeholder="Nama PTL"></div>
+                <div class="form-group"><label>Tgl Realisasi Test & Comm</label><input type="date" class="form-control" id="tglComm"></div>
+            </div>
+
+            <div class="section-title"><i class="fas fa-camera"></i> Foto Verifikasi Perwakilan Mitra</div>
+            <div class="photo-preview-box">
+                <div class="file-upload-wrapper">
+                    <input type="file" id="fotoPerwakilanMitra" accept="image/*" capture="user" onchange="previewMitraPhoto(this)">
+                    <button type="button" id="btnRemoveMitraPhoto" class="btn-remove-file" title="Hapus Gambar" onclick="resetMitraPhoto()"><i class="fas fa-times"></i></button>
+                </div>
+                <img id="imgMitraPreview" alt="Foto Perwakilan Mitra">
+                <p style="font-size:10px; color:#64748B; margin-top:4px;">Upload/Ambil Foto Mitra Lapangan (Foto Wajah/ID Card)</p>
+            </div>
+
+            <div class="section-title"><i class="fas fa-file-excel"></i> Upload Berita Acara (BA) Spreadsheet Admin</div>
+            <div class="photo-preview-box" style="background:#F0FDF4; border-color:#86EFAC;">
+                <div class="file-upload-wrapper">
+                    <input type="file" id="fileBaSpreadsheet" accept=".xlsx, .xls, .csv, .pdf, image/*" onchange="toggleFileRemoveBtn('fileBaSpreadsheet', 'btnRemoveBA')">
+                    <button type="button" id="btnRemoveBA" class="btn-remove-file" title="Hapus File" onclick="resetSingleInput('fileBaSpreadsheet', 'btnRemoveBA')"><i class="fas fa-times"></i></button>
+                </div>
+                <p style="font-size:10px; color:#166534; margin-top:4px;">*Upload file BA Admin/Spreadsheet yang akan otomatis diunggah ke folder PA di Google Drive</p>
+            </div>
+
+            <div class="section-title"><i class="fas fa-fingerprint"></i> Registrasi Sidik Jari PJT Mitra</div>
+            <div class="sig-card" style="max-width: 320px; margin: 0 auto;">
+                <h4>PJT Mitra (Rekanan)</h4>
+                <canvas id="canvasMitraReg" class="canvas-pad" width="240" height="80"></canvas>
+                <div class="sig-actions">
+                    <button type="button" class="btn-secondary" onclick="clearCanvas('canvasMitraReg', 'mitra')">Hapus Pad</button>
+                    <button type="button" class="btn-bio-sensor" onclick="authenticateFingerprint('mitraReg')">
+                        <i class="fas fa-fingerprint"></i> Fingerprint HP
+                    </button>
+                    <label class="btn-outline">
+                        <i class="fas fa-usb"></i> USB Scan
+                        <input type="file" accept="image/*" style="display:none;" onchange="loadFingerprint(this, 'mitra')">
+                    </label>
+                </div>
+            </div>
+
+            <div class="section-title"><i class="fas fa-list-ol"></i> Input Permintaan Material & Jasa Mitra (1 - 104 Item LENGKAP)</div>
+            <div class="table-responsive">
+                <table class="data-table" id="tableInputMitra">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" width="4%">NO</th>
+                            <th rowspan="2" width="40%">PEKERJAAN / MATERIAL</th>
+                            <th colspan="2">MATERIAL</th>
+                            <th colspan="2">JASA</th>
+                            <th rowspan="2" width="8%">SATUAN</th>
+                        </tr>
+                        <tr>
+                            <th>VOL AWAL</th><th>VOL AKHIR</th>
+                            <th>VOL AWAL</th><th>VOL AKHIR</th>
+                        </tr>
+                    </thead>
+                    <tbody><!-- Dynamic Rows 1 - 104 --></tbody>
+                </table>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="goToStep(0)">Kembali ke Riwayat</button>
+                <button type="button" class="btn btn-success" onclick="saveDraftMitra()"><i class="fas fa-save"></i> Simpan Permintaan Admin/Mitra</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: AUDIT LAPANGAN FS -->
+        <div id="step2-container" class="form-content" style="display: none;">
+            <div class="section-title"><i class="fas fa-user-check"></i> Audit Realisasi Pemasangan Lapangan (Oleh Field Supervisor / FS)</div>
+            <p style="font-size:11px; color:#64748B;">Isi <strong>VOL AKHIR</strong> terpasang. Unggah file bukti dokumentasi langsung di setiap baris item (Foto/PDF) dan klik tombol 'X' jika ingin mengganti file.</p>
+
+            <div class="table-responsive">
+                <table class="data-table" id="tableInputFS">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" width="3%">NO</th>
+                            <th rowspan="2" width="23%">PEKERJAAN</th>
+                            <th colspan="2">MAT</th><th colspan="2">JASA</th>
+                            <th rowspan="2" width="10%">PENILAIAN KESESUAIAN</th>
+                            <th rowspan="2" width="18%">ALASAN KETIDAKSESUAIAN</th>
+                            <th rowspan="2" width="20%">Bukti Dokumentasi</th>
+                        </tr>
+                        <tr>
+                            <th>AWAL</th><th>AKHIR</th>
+                            <th>AWAL</th><th>AKHIR</th>
+                        </tr>
+                    </thead>
+                    <tbody><!-- Dynamic FS Verification --></tbody>
+                </table>
+            </div>
+
+            <div class="section-title"><i class="fas fa-file-check"></i> Form Ceklist Dokumen Material & Alasan</div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th width="4%">NO</th>
+                            <th width="30%">JENIS DOKUMEN</th>
+                            <th width="15%">QTY (SN)</th>
+                            <th width="15%">STATUS</th>
+                            <th width="20%">ALASAN KETIDAKSESUAIAN</th>
+                            <th width="16%">Bukti Dokumentasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableDokumenBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section-title"><i class="fas fa-tasks"></i> Berita Acara Quality Control (Check Points Lapangan)</div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th width="4%">NO</th>
+                            <th width="25%">CHECK ITEM</th>
+                            <th width="45%">CHECK POINT</th>
+                            <th width="26%">STATUS CHECK POINT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableCheckPointBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section-title"><i class="fas fa-fingerprint"></i> Verifikasi Sidik Jari Field Supervisor (FS) & PTL</div>
+            <p style="font-size:11px; color:#64748B;">Goreskan tanda tangan digital pada pad, gunakan sensor sidik jari HP / Biometrik bawaan, atau unggah hasil scan alat USB.</p>
+            <div class="sig-container-grid">
+                <div class="sig-card">
+                    <h4>Field Supervisor (FS) Bertugas</h4>
+                    <canvas id="canvasFS" class="canvas-pad" width="240" height="90"></canvas>
+                    <div class="sig-actions">
+                        <button type="button" class="btn-secondary" onclick="clearCanvas('canvasFS', 'fs')">Hapus Pad</button>
+                        <button type="button" class="btn-bio-sensor" onclick="authenticateFingerprint('fs')">
+                            <i class="fas fa-fingerprint"></i> Fingerprint HP
+                        </button>
+                        <label class="btn-outline">
+                            <i class="fas fa-usb"></i> Scan USB/File
+                            <input type="file" accept="image/*" style="display:none;" onchange="loadFingerprint(this, 'fs')">
+                        </label>
+                    </div>
+                </div>
+                <div class="sig-card">
+                    <h4>Project Team Leader (PTL)</h4>
+                    <canvas id="canvasPTL" class="canvas-pad" width="240" height="90"></canvas>
+                    <div class="sig-actions">
+                        <button type="button" class="btn-secondary" onclick="clearCanvas('canvasPTL', 'ptl')">Hapus Pad</button>
+                        <button type="button" class="btn-bio-sensor" onclick="authenticateFingerprint('ptl')">
+                            <i class="fas fa-fingerprint"></i> Fingerprint HP
+                        </button>
+                        <label class="btn-outline">
+                            <i class="fas fa-usb"></i> Scan USB/File
+                            <input type="file" accept="image/*" style="display:none;" onchange="loadFingerprint(this, 'ptl')">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title"><i class="fas fa-gavel"></i> Kesimpulan Akhir Pengerjaan Lapangan</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Instalasi Pekerjaan Lapangan</label>
+                    <select class="form-control" id="resFisik">
+                        <option value="Baik">Baik</option>
+                        <option value="Tidak Baik">Tidak Baik</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Kesesuaian Spesifikasi ICON+</label>
+                    <select class="form-control" id="resSpesifikasi">
+                        <option value="Sesuai">Sesuai</option>
+                        <option value="Tidak Sesuai">Tidak Sesuai</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Keputusan Akhir QC Lapangan</label>
+                    <select class="form-control" id="resTerima">
+                        <option value="Dapat">Dapat Diterima (Diproses)</option>
+                        <option value="Tidak Dapat">Tidak Dapat Diterima (Ditunda)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="goToStep(1)">Kembali Ke Form Admin/Mitra</button>
+                <button type="button" class="btn btn-primary" onclick="saveVerificationFS()">Simpan Audit & Buat Folder Drive Otomatis <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- STEP 3: PREVIEW & PRINT SURAT -->
+        <div id="step3-container" class="form-content" style="display: none;">
+            <div class="section-title"><i class="fas fa-print"></i> Pratinjau & Cetak Surat Laporan 7 Halaman</div>
+            <p style="font-size:11px; color:#64748B;">Seluruh nama tanda tangan dan sidik jari (PTL, Field Supervisor, dan PJT Mitra) otomatis terintegrasi ke dalam surat.</p>
+            <div id="folderDriveNotice" style="display:none; margin-bottom:10px;" class="photo-preview-box">
+                <span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-check-circle"></i> Sub-Folder Baru Berhasil Dibuat Berdasarkan Nomor PA di Google Drive!</span><br>
+                <a id="linkCreatedFolder" href="#" target="_blank" style="font-size:11px; font-weight:bold; color: var(--pln-blue);">Buka Folder Khusus Sesi Ini</a>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline" onclick="openPreview()"><i class="fas fa-eye"></i> Buka Full Preview 7 Halaman Surat</button>
+                <button type="button" class="btn btn-success" onclick="printSurat()"><i class="fas fa-print"></i> Cetak Dokumen PDF Resmi</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<svg style="display: none;">
+    <g id="plnRibbonSvg">
+        <rect x="0" y="0" width="300" height="12" fill="#00A2B9" />
+        <polygon points="290,0 330,0 300,12 260,12" fill="#00A2B9" />
+        <polygon points="315,0 360,0 330,12 285,12" fill="#005A8C" />
+        <polygon points="365,0 375,0 345,12 335,12" fill="#FFCD00" />
+    </g>
+</svg>
+
+<div id="modalPreview" class="modal-overlay">
+    <div class="no-print" style="max-width: 210mm; margin: 0 auto 10px auto; text-align: right;">
+        <button class="btn btn-secondary" onclick="closePreview()">Tutup Preview</button>
+        <button class="btn btn-success" onclick="window.print()">Cetak Semua Halaman (PDF)</button>
+    </div>
+
+    <!-- PREVIEW 7 HALAMAN DOKUMEN CETAK A4 -->
+    <div class="page-a4">
+        <svg class="ribbon-top-left" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <svg class="ribbon-bottom-right" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <div class="paper-header">
+            <div class="brand-logo-container">
+                <div class="logo-box" style="width: 36px; height: 36px;">
+                    <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 12 38 Q 24 33, 36 38 T 60 38 T 84 38 T 88 38" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 54 Q 24 49, 36 54 T 60 54 T 84 54 T 88 54" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 70 Q 24 65, 36 70 T 60 70 T 84 70 T 88 70" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <polygon points="43,12 57,12 42,48 68,38 51,90 57,52 32,58" fill="#ED1C24"/>
+                    </svg>
+                </div>
+                <div class="logo-text-group">
+                    <span class="pln-title" style="font-size: 22px;">PLN</span>
+                    <span class="icon-plus-title" style="font-size: 13px;">Icon Plus</span>
+                </div>
+            </div>
+            <h3>BERITA ACARA QUALITY CONTROL INSTALASI FOC DAN FOT</h3>
+        </div>
+        <table class="meta-table">
+            <tr><td width="20%"><strong>Tanggal QC</strong></td><td width="2%">:</td><td width="28%" class="pvTglQC"></td><td width="20%"><strong>Nama POP</strong></td><td width="2%">:</td><td width="28%" class="pvNamaPOP"></td></tr>
+            <tr><td><strong>Nomor PA</strong></td><td>:</td><td class="pvNomorPA"></td><td><strong>Nama Pelanggan</strong></td><td>:</td><td class="pvNamaPelanggan"></td></tr>
+            <tr><td><strong>Nama Pekerjaan</strong></td><td>:</td><td class="pvNamaPekerjaan"></td><td><strong>Alamat Pelanggan</strong></td><td>:</td><td class="pvAlamatPelanggan"></td></tr>
+            <tr><td><strong>Nama Rekanan/Vendor</strong></td><td>:</td><td class="pvNamaMitra"></td><td><strong>Field Supervisor (FS)</strong></td><td>:</td><td class="pvNamaFS"></td></tr>
+            <tr><td><strong>PJT Mitra Lapangan</strong></td><td>:</td><td class="pvPJMitra"></td><td><strong>Tgl Test & Comm</strong></td><td>:</td><td class="pvTglComm"></td></tr>
+        </table>
+        <div style="font-weight:bold; margin-bottom: 3px;">1. MATERIAL dan JASA (Halaman 1: Item 1 - 30)</div>
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" width="4%">NO</th><th rowspan="2" width="30%">PEKERJAAN / MATERIAL</th>
+                    <th colspan="3" width="22%">MATERIAL</th><th colspan="3" width="22%">JASA</th>
+                    <th rowspan="2" width="22%">STATUS KESESUAIAN & ALASAN</th>
+                </tr>
+                <tr><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th></tr>
+            </thead>
+            <tbody id="page1Body"></tbody>
+        </table>
+        <div style="position: absolute; bottom: 8mm; right: 15mm; font-size: 8px;">Halaman 1 dari 7</div>
+    </div>
+
+    <!-- HALAMAN 2 -->
+    <div class="page-a4">
+        <svg class="ribbon-top-left" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <svg class="ribbon-bottom-right" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <div style="font-weight:bold; margin-bottom: 5px; margin-top: 5px;">1. MATERIAL dan JASA (Lanjutan Halaman 2: Item 31 - 60)</div>
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" width="4%">NO</th><th rowspan="2" width="30%">PEKERJAAN / MATERIAL</th>
+                    <th colspan="3" width="22%">MATERIAL</th><th colspan="3" width="22%">JASA</th>
+                    <th rowspan="2" width="22%">STATUS KESESUAIAN & ALASAN</th>
+                </tr>
+                <tr><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th></tr>
+            </thead>
+            <tbody id="page2Body"></tbody>
+        </table>
+        <div style="position: absolute; bottom: 8mm; right: 15mm; font-size: 8px;">Halaman 2 dari 7</div>
+    </div>
+
+    <!-- HALAMAN 3 -->
+    <div class="page-a4">
+        <svg class="ribbon-top-left" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <svg class="ribbon-bottom-right" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <div style="font-weight:bold; margin-bottom: 5px; margin-top: 5px;">1. MATERIAL dan JASA (Lanjutan Halaman 3: Item 61 - 90)</div>
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" width="4%">NO</th><th rowspan="2" width="30%">PEKERJAAN / MATERIAL</th>
+                    <th colspan="3" width="22%">MATERIAL</th><th colspan="3" width="22%">JASA</th>
+                    <th rowspan="2" width="22%">STATUS KESESUAIAN & ALASAN</th>
+                </tr>
+                <tr><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th></tr>
+            </thead>
+            <tbody id="page3Body"></tbody>
+        </table>
+        <div style="position: absolute; bottom: 8mm; right: 15mm; font-size: 8px;">Halaman 3 dari 7</div>
+    </div>
+
+    <!-- HALAMAN 4 -->
+    <div class="page-a4">
+        <svg class="ribbon-top-left" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <svg class="ribbon-bottom-right" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <div style="font-weight:bold; margin-bottom: 5px; margin-top: 5px;">1. MATERIAL dan JASA (Lanjutan Halaman 4: Item 91 - 104)</div>
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" width="4%">NO</th><th rowspan="2" width="30%">PEKERJAAN / MATERIAL</th>
+                    <th colspan="3" width="22%">MATERIAL</th><th colspan="3" width="22%">JASA</th>
+                    <th rowspan="2" width="22%">STATUS KESESUAIAN & ALASAN</th>
+                </tr>
+                <tr><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th><th>VOL AWAL</th><th>VOL AKHIR</th><th>SAT</th></tr>
+            </thead>
+            <tbody id="page4Body"></tbody>
+        </table>
+
+        <div style="font-weight: bold; margin: 8px 0 3px 0;">II. INSTALASI PEKERJAAN & KESIMPULAN</div>
+        <div style="border: 1px solid #000; padding: 5px; margin-bottom: 8px; font-size: 9px; background: #ffffff;">
+            Instalasi pekerjaan di Lapangan dinyatakan (<strong id="pvResFisik">Baik</strong>) dan (<strong id="pvResSpesifikasi">Sesuai</strong>) Spesifikasi ICON+.<br>
+            <strong>Kesimpulan:</strong> Hasil pemeriksaan fisik (QC) di Lapangan dengan ini (<strong id="pvResTerima">Dapat</strong>) di Terima sehingga (Dapat Diproses/Ditunda) ke tahap berikutnya.
+        </div>
+
+        <div class="paper-signatures">
+            <div class="sig-box"><div>Field Supervisor (FS)</div><div class="sig-space" id="pvSigFS_H4"></div><div id="pvNamaQCBawah"></div></div>
+            <div class="sig-box"><div>Rekanan / PJT Mitra</div><div class="sig-space" id="pvSigMitra_H4"></div><div id="pvNamaMitraBawah"></div></div>
+            <div class="sig-box"><div>Menyetujui,<br>Project Team Leader</div><div class="sig-space" id="pvSigPTL_H4"></div><div id="pvNamaPTLBawah"></div></div>
+        </div>
+        <div style="position: absolute; bottom: 8mm; right: 15mm; font-size: 8px;">Halaman 4 dari 7</div>
+    </div>
+
+    <!-- HALAMAN 5 -->
+    <div class="page-a4">
+        <svg class="ribbon-top-left" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <svg class="ribbon-bottom-right" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <div class="paper-header">
+            <div class="brand-logo-container">
+                <div class="logo-box" style="width: 36px; height: 36px;">
+                    <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 12 38 Q 24 33, 36 38 T 60 38 T 84 38 T 88 38" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 54 Q 24 49, 36 54 T 60 54 T 84 54 T 88 54" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 70 Q 24 65, 36 70 T 60 70 T 84 70 T 88 70" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <polygon points="43,12 57,12 42,48 68,38 51,90 57,52 32,58" fill="#ED1C24"/>
+                    </svg>
+                </div>
+                <div class="logo-text-group">
+                    <span class="pln-title" style="font-size: 22px;">PLN</span>
+                    <span class="icon-plus-title" style="font-size: 13px;">Icon Plus</span>
+                </div>
+            </div>
+            <h3>FORM CEKLIST DOKUMEN MATERIAL & BERITA ACARA QC</h3>
+        </div>
+        <div style="font-weight:bold; margin-bottom: 3px;">A. DOKUMEN MATERIAL VERIFIKASI</div>
+        <table class="doc-table">
+            <thead>
+                <tr><th>NO</th><th>JENIS DOKUMEN</th><th>QTY (SN)</th><th>STATUS KESESUAIAN</th><th>ALASAN KETIDAKSESUAIAN</th></tr>
+            </thead>
+            <tbody id="page5DokBody"></tbody>
+        </table>
+
+        <div style="font-weight:bold; margin: 10px 0 3px 0;">B. BERITA ACARA QUALITY CONTROL (CHECK POINTS)</div>
+        <table class="doc-table">
+            <thead>
+                <tr><th>NO</th><th>CHECK ITEM</th><th>CHECK POINT</th><th>STATUS</th></tr>
+            </thead>
+            <tbody id="page5CPBody"></tbody>
+        </table>
+
+        <div class="paper-signatures">
+            <div class="sig-box"><div>Field Supervisor (FS)</div><div class="sig-space" id="pvSigFS_H5"></div><div class="pvNamaQCBawahText"></div></div>
+            <div class="sig-box"><div>Rekanan / PJT Mitra</div><div class="sig-space" id="pvSigMitra_H5"></div><div class="pvNamaMitraBawahText"></div></div>
+            <div class="sig-box"><div>Project Team Leader</div><div class="sig-space" id="pvSigPTL_H5"></div><div class="pvNamaPTLBawahText"></div></div>
+        </div>
+        <div style="position: absolute; bottom: 8mm; right: 15mm; font-size: 8px;">Halaman 5 dari 7</div>
+    </div>
+
+    <!-- HALAMAN 6 -->
+    <div class="page-a4">
+        <svg class="ribbon-top-left" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <svg class="ribbon-bottom-right" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <div class="paper-header">
+            <div class="brand-logo-container">
+                <div class="logo-box" style="width: 36px; height: 36px;">
+                    <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 12 38 Q 24 33, 36 38 T 60 38 T 84 38 T 88 38" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 54 Q 24 49, 36 54 T 60 54 T 84 54 T 88 54" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 70 Q 24 65, 36 70 T 60 70 T 84 70 T 88 70" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <polygon points="43,12 57,12 42,48 68,38 51,90 57,52 32,58" fill="#ED1C24"/>
+                    </svg>
+                </div>
+                <div class="logo-text-group">
+                    <span class="pln-title" style="font-size: 22px;">PLN</span>
+                    <span class="icon-plus-title" style="font-size: 13px;">Icon Plus</span>
+                </div>
+            </div>
+            <h3>FORMULIR INSTALASI AKSESORIS TIANG & PERANGKAT</h3>
+        </div>
+        <table class="doc-table">
+            <thead>
+                <tr><th>NO</th><th>AKSESORIS TIANG</th><th>KETERANGAN</th><th>NO</th><th>AKSESORIS TIANG</th><th>KETERANGAN</th></tr>
+            </thead>
+            <tbody id="page6AccBody"></tbody>
+        </table>
+        <div style="position: absolute; bottom: 8mm; right: 15mm; font-size: 8px;">Halaman 6 dari 7</div>
+    </div>
+
+    <!-- HALAMAN 7 -->
+    <div class="page-a4">
+        <svg class="ribbon-top-left" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <svg class="ribbon-bottom-right" viewBox="0 0 400 12" preserveAspectRatio="none"><use href="#plnRibbonSvg"/></svg>
+        <div class="paper-header">
+            <div class="brand-logo-container">
+                <div class="logo-box" style="width: 36px; height: 36px;">
+                    <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 12 38 Q 24 33, 36 38 T 60 38 T 84 38 T 88 38" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 54 Q 24 49, 36 54 T 60 54 T 84 54 T 88 54" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <path d="M 12 70 Q 24 65, 36 70 T 60 70 T 84 70 T 88 70" stroke="#00A2E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                        <polygon points="43,12 57,12 42,48 68,38 51,90 57,52 32,58" fill="#ED1C24"/>
+                    </svg>
+                </div>
+                <div class="logo-text-group">
+                    <span class="pln-title" style="font-size: 22px;">PLN</span>
+                    <span class="icon-plus-title" style="font-size: 13px;">Icon Plus</span>
+                </div>
+            </div>
+            <h3>LAMPIRAN DOKUMENTASI FOTO BUKTI LAPANGAN</h3>
+        </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <p style="font-weight: bold; font-size: 10px; margin-bottom: 8px;">FOTO VERIFIKASI PERWAKILAN MITRA LAPANGAN</p>
+            <div style="border: 1px solid #000; padding: 5px; width: 200px; margin: 0 auto 15px auto; background: #fafafa;">
+                <img id="pvMitraPhotoOut" style="max-width: 100%; height: 130px; object-fit: cover;" alt="Foto Mitra Lapangan">
+                <p style="font-size: 9px; margin: 4px 0 0 0; font-weight: bold;" class="pvPJMitraText">-</p>
+            </div>
+
+            <p style="font-weight: bold; font-size: 10px; margin-bottom: 8px;">DOKUMENTASI ROLL METER GALIAN, OTDR, & TAGGING PERANGKAT TERPASANG</p>
+            <div style="border: 2px dashed #000; height: 260px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; background: #fafafa;">
+                <p style="font-weight: bold; color: #555; font-size: 11px;">[ TAMPILAN FOTO-FOTO DOKUMENTASI TERLAMPIR SECARA OTOMATIS ]</p>
+            </div>
+            <p style="font-size: 9px;">Tanggal Pengecekan: <span class="pvTglQC"></span> | Pelanggan: <span class="pvNamaPelanggan"></span></p>
+        </div>
+        <div class="paper-signatures" style="margin-top: 20px;">
+            <div class="sig-box"><div>Dibuat Oleh,<br>Field Supervisor (FS)</div><div class="sig-space" id="pvSigFS_H7"></div><div class="pvNamaQCBawahText"></div></div>
+            <div class="sig-box"><div>Mengetahui,<br>Rekanan / PJT Mitra</div><div class="sig-space" id="pvSigMitra_H7"></div><div class="pvNamaMitraBawahText"></div></div>
+            <div class="sig-box"><div>Menyetujui,<br>Project Team Leader</div><div class="sig-space" id="pvSigPTL_H7"></div><div class="pvNamaPTLBawahText"></div></div>
+        </div>
+        <div style="position: absolute; bottom: 8mm; right: 15mm; font-size: 8px;">Halaman 7 dari 7</div>
+    </div>
+</div>
+
