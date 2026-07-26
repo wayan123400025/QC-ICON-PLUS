@@ -128,10 +128,84 @@
 
     const SCRIPT_URL = "PASANG_URL_WEB_APP_APPS_SCRIPT_KAMU_DI_SINI";
 
+    /* =========================================================
+       INTEGRASI DATABASE (TiDB Serverless via /api/records) &
+       GOOGLE DRIVE (Service Account via /api/drive-upload).
+       Semua fungsi di bawah ini sengaja "gagal secara diam-diam"
+       (fallback ke localStorage) kalau DATABASE_URL / kredensial
+       Google belum di-set, supaya aplikasi tetap jalan normal
+       sebelum kamu menyelesaikan setup di README.md.
+       ========================================================= */
+
+    async function fetchRecordsFromServer() {
+        try {
+            const res = await fetch('/api/records');
+            const json = await res.json();
+            if (json.ok && Array.isArray(json.records)) {
+                return json.records;
+            }
+        } catch (err) {
+            console.warn('Belum terhubung ke database (TiDB). Memakai data lokal (localStorage) dulu.', err);
+        }
+        return null;
+    }
+
+    async function syncRecordToServer(rec) {
+        try {
+            if (rec.id) {
+                const res = await fetch(`/api/records/${rec.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rec)
+                });
+                const json = await res.json();
+                return json.ok;
+            } else {
+                const res = await fetch('/api/records', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rec)
+                });
+                const json = await res.json();
+                if (json.ok) {
+                    rec.id = json.id;
+                    return true;
+                }
+                return false;
+            }
+        } catch (err) {
+            console.warn('Gagal sinkron ke database (TiDB). Data tetap aman di localStorage.', err);
+            return false;
+        }
+    }
+
+    async function uploadFileToDriveApi(file, folderName) {
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('folderName', folderName || 'Tanpa Nomor PA');
+            const res = await fetch('/api/drive-upload', { method: 'POST', body: fd });
+            const json = await res.json();
+            return json.ok ? json : null;
+        } catch (err) {
+            console.warn('Gagal upload ke Google Drive (cek kredensial Service Account).', err);
+            return null;
+        }
+    }
+
     function initQcApp() {
-        renderHistory();
         renderInputTables();
         initSignaturePads();
+
+        // Coba muat riwayat dari database dulu (TiDB Serverless). Kalau belum
+        // terhubung/di-setup, otomatis pakai localStorage seperti sebelumnya.
+        fetchRecordsFromServer().then((serverRecords) => {
+            if (serverRecords) {
+                qcDatabase = serverRecords;
+                localStorage.setItem('pln_qc_db_v3', JSON.stringify(qcDatabase));
+            }
+            renderHistory();
+        });
     }
     window.initQcApp = initQcApp;
 
@@ -552,7 +626,7 @@
         });
     }
 
-    function saveDraftMitra() {
+    async function saveDraftMitra() {
         if(activeRecordIndex < 0) return;
         const rec = qcDatabase[activeRecordIndex];
 
@@ -580,7 +654,20 @@
 
         rec.status = "Draft Admin/Mitra Tersimpan";
         localStorage.setItem('pln_qc_db_v3', JSON.stringify(qcDatabase));
-        alert("Draft Permintaan Admin/Mitra Berhasil Disimpan!");
+
+        // Upload foto perwakilan mitra ke Google Drive (kalau ada file & Service Account sudah di-setup)
+        const mitraPhotoInput = document.getElementById('fotoPerwakilanMitra');
+        if (mitraPhotoInput && mitraPhotoInput.files[0]) {
+            const uploaded = await uploadFileToDriveApi(mitraPhotoInput.files[0], rec.nomorPA || 'Tanpa Nomor PA');
+            if (uploaded) rec.mitraPhotoDriveLink = uploaded.webViewLink;
+        }
+
+        const synced = await syncRecordToServer(rec);
+        localStorage.setItem('pln_qc_db_v3', JSON.stringify(qcDatabase));
+
+        alert(synced
+            ? "Draft Permintaan Admin/Mitra berhasil disimpan ke database (TiDB) & lokal!"
+            : "Draft tersimpan di perangkat ini (lokal). Database belum terhubung — cek README.md bagian Setup TiDB Serverless.");
         goToStep(2);
     }
 
@@ -638,34 +725,48 @@
             }
         }
 
-        if (SCRIPT_URL && SCRIPT_URL !== "PASANG_URL_WEB_APP_APPS_SCRIPT_KAMU_DI_SINI") {
-            alert(`Sedang mengirim berkas & membuat sub-folder di Google Drive untuk Nomor PA (${paNum})...`);
-            
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(rec)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") {
-                    document.getElementById('folderDriveNotice').style.display = 'block';
-                    document.getElementById('linkCreatedFolder').href = data.folderUrl;
-                    alert(`Berhasil! ${data.message}`);
-                } else {
-                    alert("Tersimpan lokal, namun Google Drive Error: " + data.message);
-                }
-                goToStep(3);
-            })
-            .catch(err => {
-                console.error(err);
-                alert(`Audit tersimpan secara lokal untuk Nomor PA "${paNum}".`);
-                goToStep(3);
-            });
-        } else {
-            alert(`Pemeriksaan FS Lapangan Berhasil Disimpan di Lokal (Nomor PA: ${paNum})!`);
-            goToStep(3);
+        alert(`Menyimpan hasil audit & mengunggah berkas untuk Nomor PA (${paNum})...`);
+
+        // Upload semua file bukti (BA, dokumen, per-item) langsung ke Google Drive
+        // lewat /api/drive-upload (Service Account) — folder otomatis dibuat per Nomor PA.
+        let driveUploadCount = 0;
+        let driveFolderLink = null;
+
+        if (baFileInput && baFileInput.files[0]) {
+            const up = await uploadFileToDriveApi(baFileInput.files[0], paNum);
+            if (up) { rec.fileBADriveLink = up.webViewLink; driveUploadCount++; }
         }
+        for (let idx = 0; idx < dokList.length; idx++) {
+            const input = document.getElementById(`fotoDok_${idx}`);
+            if (input && input.files[0]) {
+                const up = await uploadFileToDriveApi(input.files[0], paNum);
+                if (up) driveUploadCount++;
+            }
+        }
+        for (let idx = 0; idx < masterItems.length; idx++) {
+            const input = document.getElementById(`fotoItem_${idx}`);
+            if (input && input.files[0]) {
+                const up = await uploadFileToDriveApi(input.files[0], paNum);
+                if (up) { driveUploadCount++; driveFolderLink = up.folderId; }
+            }
+        }
+
+        const synced = await syncRecordToServer(rec);
+        localStorage.setItem('pln_qc_db_v3', JSON.stringify(qcDatabase));
+
+        if (driveFolderLink) {
+            document.getElementById('folderDriveNotice').style.display = 'block';
+            document.getElementById('linkCreatedFolder').href = `https://drive.google.com/drive/folders/${driveFolderLink}`;
+        }
+
+        if (synced && driveUploadCount > 0) {
+            alert(`Berhasil! Audit tersimpan di database & ${driveUploadCount} berkas terunggah ke Google Drive.`);
+        } else if (synced) {
+            alert("Audit berhasil tersimpan ke database (TiDB). Tidak ada berkas yang diunggah ke Drive.");
+        } else {
+            alert(`Audit tersimpan di perangkat ini (lokal) untuk Nomor PA "${paNum}". Cek README.md untuk menghubungkan database/Drive.`);
+        }
+        goToStep(3);
     }
 
     function goToStep(s) {

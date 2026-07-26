@@ -1,0 +1,41 @@
+// Prisma schema untuk database TiDB Serverless (MySQL-compatible, gratis)
+// Dokumentasi lengkap ada di README.md bagian "Setup TiDB Serverless".
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  // TiDB Serverless (masih berbasis MySQL/Vitess) tidak mendukung foreign key
+  // constraint bawaan Prisma, jadi kita pakai relationMode = "prisma".
+  relationMode = "prisma"
+}
+
+// Satu baris = satu record/draft pengisian form QC (sama seperti satu item
+// di array qcDatabase pada versi localStorage sebelumnya), tapi sekarang
+// disimpan di database supaya bisa diakses dari perangkat/browser manapun.
+model QcRecord {
+  id              String   @id @default(cuid())
+
+  // Kolom ringkas untuk pencarian/filter cepat di halaman "Riwayat & Draft"
+  nomorPA         String?  @db.VarChar(191)
+  namaPekerjaan   String?  @db.VarChar(255)
+  namaMitra       String?  @db.VarChar(255)
+  namaPelanggan   String?  @db.VarChar(255)
+
+  // Status alur pengisian: "draft-mitra" (baru step 1) atau "verified-fs" (sudah step 2)
+  status          String   @default("draft-mitra") @db.VarChar(50)
+
+  // Seluruh data form (semua 104 item, foto base64, tanda tangan base64, dst)
+  // disimpan sebagai satu JSON besar, sama persis seperti struktur objek
+  // yang dulu disimpan di localStorage.
+  data            String   @db.LongText
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([nomorPA])
+  @@index([status])
+}
