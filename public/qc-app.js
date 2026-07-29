@@ -122,6 +122,8 @@
     let currentStep = 0;
     let activeRecordIndex = -1;
     let currentMitraPhotoBase64 = "";
+    let currentDokPhotos = [];
+    let currentItemPhotos = [];
     let qcDatabase = JSON.parse(localStorage.getItem('pln_qc_db_v3') || '[]');
 
     let signatures = { fs: '', mitra: '', ptl: '' };
@@ -329,6 +331,9 @@
         document.getElementById('alamatPelanggan').value = rec.alamatPelanggan || '';
         document.getElementById('namaPTL').value = rec.namaPTL || '';
         document.getElementById('tglComm').value = rec.tglComm || '';
+
+        currentDokPhotos = rec.uploadedDokFiles || [];
+        currentItemPhotos = rec.uploadedItemFiles || [];
 
         if(rec.mitraPhoto) {
             currentMitraPhotoBase64 = rec.mitraPhoto;
@@ -725,6 +730,9 @@
             }
         }
 
+        currentDokPhotos = rec.uploadedDokFiles;
+        currentItemPhotos = rec.uploadedItemFiles;
+
         alert(`Menyimpan hasil audit & mengunggah berkas untuk Nomor PA (${paNum})...`);
 
         // Upload semua file bukti (BA, dokumen, per-item) langsung ke Google Drive
@@ -799,6 +807,16 @@
         document.getElementById('pvResFisik').innerText = document.getElementById('resFisik').value;
         document.getElementById('pvResSpesifikasi').innerText = document.getElementById('resSpesifikasi').value;
         document.getElementById('pvResTerima').innerText = document.getElementById('resTerima').value;
+
+        const fotoGrid = document.getElementById('pvDokumentasiFotoGrid');
+        const allDokFotos = [...(currentDokPhotos || []), ...(currentItemPhotos || [])];
+        if (allDokFotos.length > 0) {
+            fotoGrid.innerHTML = allDokFotos.map(src =>
+                `<img src="${src}" style="width: 110px; height: 110px; object-fit: cover; border: 1px solid #999;">`
+            ).join('');
+        } else {
+            fotoGrid.innerHTML = '<p style="font-weight: bold; color: #555; font-size: 11px;">[ Belum ada foto dokumentasi diunggah ]</p>';
+        }
 
         const imgMitraOut = document.getElementById('pvMitraPhotoOut');
         if (currentMitraPhotoBase64) {
