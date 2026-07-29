@@ -1,5 +1,4 @@
-
-    const masterItems = [
+const masterItems = [
         { no: 1, name: "Survey jalur kabel max 3 hari", sat: "LOT" },
         { no: 2, name: "Penarikan FOC ADSS Short Span", sat: "M" },
         { no: 3, name: "Penarikan FOC 8000 - 16000m", sat: "M" },
@@ -811,9 +810,10 @@
         const fotoGrid = document.getElementById('pvDokumentasiFotoGrid');
         const allDokFotos = [...(currentDokPhotos || []), ...(currentItemPhotos || [])];
         if (allDokFotos.length > 0) {
-            fotoGrid.innerHTML = allDokFotos.map(src =>
-                `<img src="${src}" style="width: 110px; height: 110px; object-fit: cover; border: 1px solid #999;">`
-            ).join('');
+            fotoGrid.innerHTML = allDokFotos.map(item => {
+                const src = (item && typeof item === 'object') ? item.base64 : item;
+                return `<img src="${src}" style="width: 110px; height: 110px; object-fit: cover; border: 1px solid #999;">`;
+            }).join('');
         } else {
             fotoGrid.innerHTML = '<p style="font-weight: bold; color: #555; font-size: 11px;">[ Belum ada foto dokumentasi diunggah ]</p>';
         }
