@@ -812,10 +812,10 @@ const masterItems = [
         if (allDokFotos.length > 0) {
             fotoGrid.innerHTML = allDokFotos.map(item => {
                 const src = (item && typeof item === 'object') ? item.base64 : item;
-                return `<img src="${src}" style="width: 110px; height: 110px; object-fit: cover; border: 1px solid #999;">`;
+                return `<img src="${src}" style="width: 100%; height: 220px; object-fit: cover; border: 1px solid #999; display: block;">`;
             }).join('');
         } else {
-            fotoGrid.innerHTML = '<p style="font-weight: bold; color: #555; font-size: 11px;">[ Belum ada foto dokumentasi diunggah ]</p>';
+            fotoGrid.innerHTML = '<p style="grid-column: 1 / -1; font-weight: bold; color: #555; font-size: 11px;">[ Belum ada foto dokumentasi diunggah ]</p>';
         }
 
         const imgMitraOut = document.getElementById('pvMitraPhotoOut');
